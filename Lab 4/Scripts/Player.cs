@@ -11,28 +11,51 @@ public class Player : MonoBehaviour
 
     [Header("Prefabs")]
     public GameObject laserPrefab;
+    public Rigidbody2D rb;
 
     [Header("Values")]
     [SerializeField] private float speed = 6f;
     [SerializeField] private float horizontalScreenLimit = 10f;
     [SerializeField] private float verticalScreenLimit = 6f;
     [SerializeField] private bool canShoot = true;
+    Vector2 movementDirection = Vector2.zero;
+    private PlayerInputs playerInput;
 
+    private void Awake()
+    {
+        playerInput = new PlayerInputs();
+    }
+
+    private void OnEnable()
+    {
+        moveAction = playerInput.Player.Move;
+        fireAction = playerInput.Player.Attack;
+        moveAction.Enable();
+        fireAction.Enable();
+    }
+
+    private void OnDisable()
+    {
+        moveAction.Disable();
+        fireAction.Disable();
+    }
     // Update is called once per frame
     void Update()
     {
         Movement();
         Shooting();
     }
+    private void FixedUpdate()
+    {
+        rb.MovePosition(rb.position + speed * Time.fixedDeltaTime * movementDirection);
+    }
 
     void Movement()
     {
         //changed if-else statement to switch statement.
-        Vector3 currentPosition = transform.position;
+        Vector2 currentPosition = transform.position;
 
-        Vector2 moveInput = moveAction.ReadValue<Vector2>();
-        Vector3 moveDelta = speed * Time.deltaTime * (Vector3)moveInput;
-        transform.Translate(moveDelta, Space.World);
+        movementDirection = moveAction.ReadValue<Vector2>();
 
         switch (currentPosition.x)
         {
